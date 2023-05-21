@@ -3,7 +3,7 @@ package me.comfortable_andy.thathurts.collision;
 import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.inventory.EquipmentSlot;
 
-public enum BodyParts {
+public enum BodyPart {
 
     HEAD(EquipmentSlot.HEAD, new DoubleRange(1.5, 2), new DoubleRange(-1, 1)),
     ARMS(EquipmentSlot.CHEST, new DoubleRange(0.75, 1.5), new DoubleRange(-1, -0.23), new DoubleRange(0.23, 1)),
@@ -15,7 +15,7 @@ public enum BodyParts {
     private final DoubleRange yRange;
     private final DoubleRange[] xRanges;
 
-    BodyParts(EquipmentSlot slot, DoubleRange yRange, DoubleRange... xRanges) {
+    BodyPart(EquipmentSlot slot, DoubleRange yRange, DoubleRange... xRanges) {
         this.slot = slot;
         this.yRange = yRange;
         this.xRanges = xRanges;
