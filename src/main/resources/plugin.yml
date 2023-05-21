@@ -1,0 +1,5 @@
+name: ThatHurts
+version: '${version}'
+main: me.comfortable_andy.thathurts.ThatHurtsMain
+api-version: 1.18
+authors: [Comfortable_Andy]
