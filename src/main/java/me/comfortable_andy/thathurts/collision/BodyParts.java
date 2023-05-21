@@ -1,4 +1,4 @@
-package java.me.comfortable_andy.thathurts.collision;
+package me.comfortable_andy.thathurts.collision;
 
 import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.inventory.EquipmentSlot;
