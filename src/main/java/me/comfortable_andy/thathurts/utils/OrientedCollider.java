@@ -35,7 +35,7 @@ public abstract class OrientedCollider {
     }
 
     public void rotateBy(float xDeg, float yDeg, float zDeg) {
-        this.rotateBy(new Quaternionf().rotationXYZ((float) Math.toRadians(xDeg), (float) Math.toRadians(yDeg), (float) Math.toRadians(zDeg)));
+        this.rotateBy(new Quaternionf().rotationXYZ((float) Math.toRadians(xDeg), (float) Math.toRadians(yDeg), (float) Math.toRadians(zDeg)).invert());
     }
 
     public void rotateBy(@NotNull Quaternionf rotation) {

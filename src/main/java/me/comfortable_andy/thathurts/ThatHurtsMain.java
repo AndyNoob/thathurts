@@ -4,10 +4,7 @@ import co.aikar.commands.BukkitCommandManager;
 import me.comfortable_andy.thathurts.commands.BoundingBoxTestCommand;
 import me.comfortable_andy.thathurts.commands.SetColorCommand;
 import me.comfortable_andy.thathurts.listeners.DamageListener;
-import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Arrays;
 
 public final class ThatHurtsMain extends JavaPlugin {
 

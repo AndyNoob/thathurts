@@ -10,7 +10,6 @@ import co.aikar.commands.annotation.Subcommand;
 import me.comfortable_andy.thathurts.ThatHurtsMain;
 import me.comfortable_andy.thathurts.utils.OrientedBox;
 import me.comfortable_andy.thathurts.utils.OrientedCollider;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -36,8 +35,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
 
     private World world = null;
     private final Map<String, OrientedBox> testingBox = new ConcurrentHashMap<>();
-    private int extra = 0;
-    private Particle particle = Particle.VILLAGER_HAPPY;
+    private final Particle particle = Particle.VILLAGER_HAPPY;
 
     @SuppressWarnings("FieldCanBeLocal")
     private final Runnable renderRunnable = () -> {
@@ -63,7 +61,8 @@ public class BoundingBoxTestCommand extends BaseCommand {
 
     private void render(OrientedBox box) {
         for (OrientedCollider.Vertex vertex : box.getRelativeVertices()) {
-            this.world.spawnParticle(this.particle, bukkitLoc(convertBukkit(vertex.pos()).add(convertBukkit(box.getCenter())), this.world), 1, 0, 0, 0, this.extra);
+            int extra = 0;
+            this.world.spawnParticle(this.particle, bukkitLoc(convertBukkit(vertex.pos()).add(convertBukkit(box.getCenter())), this.world), 1, 0, 0, 0, extra);
         }
         for (OrientedCollider.Side side : box.computeSides()) {
             side.display(this.world, this.particle);
@@ -159,9 +158,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
         // bbt make box1 0,-59,10 -2,-56,15
         // bbt make box2 0,-59,8 -2,-56,3
 
-        box.rotateBy(
-                new Quaternionf().rotateXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z))
-        );
+        box.rotateBy(x, y, z);
 
         sender.sendMessage("Rotated " + ChatColor.BOLD + name + ChatColor.RESET + " by " + x + ", " + y + ", " + z);
         sender.sendMessage("or," + Math.toRadians(x) + ", " + Math.toRadians(y) + ", " + Math.toRadians(z));

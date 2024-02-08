@@ -4,6 +4,7 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("unused")
 public class NumberUtil {
 
     public static double clamp(double min, double value, double max) {
