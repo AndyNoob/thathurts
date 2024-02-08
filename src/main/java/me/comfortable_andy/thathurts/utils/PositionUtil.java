@@ -1,8 +1,10 @@
 package me.comfortable_andy.thathurts.utils;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 public class PositionUtil {
 
@@ -24,16 +26,28 @@ public class PositionUtil {
     }
 
     public static Vector closestPoint(Vector start, Vector end, Vector check) {
-        final Vector startToEnd = end.clone().subtract(start);
-        final Vector startToCheck = check.clone().subtract(start);
+        final Vector originShiftedEnd = end.clone().subtract(start);
+        final Vector originShiftedCheck = check.clone().subtract(start);
 
-        final double projected = startToEnd.dot(startToCheck);
-        final double lineMagnitudeSquared = start.distanceSquared(end);
-        final double factor = projected / lineMagnitudeSquared;
+        final double currentLengthSquared = originShiftedEnd.dot(originShiftedCheck);
+        final double lineLengthSquared = start.distanceSquared(end);
+        final double percentageToEnd = currentLengthSquared / lineLengthSquared;
 
-        if (factor <= 0) return start.clone();
-        else if (factor >= 1) return end.clone();
-        else return lerp(start, end, factor);
+        if (percentageToEnd <= 0) return start.clone();
+        else if (percentageToEnd >= 1) return end.clone();
+        else return lerp(start, end, percentageToEnd);
+    }
+
+    public static Vector3f convertJoml(Vector vector) {
+        return new Vector3f((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
+    }
+
+    public static Vector convertBukkit(Vector3f vector) {
+        return new Vector(vector.x(), vector.y(), vector.z());
+    }
+
+    public static Location bukkitLoc(Vector vector, World world) {
+        return new Location(world, vector.getX(), vector.getY(), vector.getZ());
     }
 
 }

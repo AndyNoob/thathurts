@@ -1,5 +1,6 @@
 package me.comfortable_andy.thathurts.utils;
 
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,10 @@ public class NumberUtil {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static boolean lenientZero(Number number) {
+        return Math.abs(number.doubleValue()) < Vector.getEpsilon();
     }
 
 }

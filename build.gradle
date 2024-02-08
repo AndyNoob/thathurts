@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'io.papermc.paperweight.userdev' version '1.5.9'
+    id 'xyz.jpenilla.run-paper' version '2.2.2'
 }
 
 group = 'me.comfortable_andy'
@@ -15,14 +18,35 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        name = "aikar-repo"
+        url = "https://repo.aikar.co/content/groups/aikar/"
+    }
+    maven {
+        name = "protocol-lib"
+        url = "https://repo.dmulloy2.net/repository/public/"
+    }
 }
 
 dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.28'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+
     compileOnly 'org.jetbrains:annotations:24.0.0'
+    compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
+    implementation 'co.aikar:acf-bukkit:0.5.1-SNAPSHOT'
+    implementation 'org.joml:joml:1.10.5'
+
+    paperweight.paperDevBundle '1.19.2-R0.1-SNAPSHOT'
+
+    testImplementation 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    compileOnly "org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT"
-    testImplementation "org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT"
+
+    test.useJUnitPlatform()
 }
 
 def targetJavaVersion = 17
@@ -31,7 +55,7 @@ java {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
     if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+        toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
     }
 }
 
@@ -50,7 +74,31 @@ processResources {
     }
 }
 
-jar {
+shadowJar {
+    minimize()
+    archiveClassifier.set('')
+    enableRelocation true
+    relocationPrefix 'me.comfortable_andy.thathurts.libs'
+
     def dir = System.getProperty("outputDirectory")
     if (dir) destinationDirectory.set(file(dir))
+    System.out.println("Building ==> " + destinationDirectory.get())
+}
+
+tasks.build {
+    dependsOn(shadowJar)
+}
+
+tasks.assemble {
+    dependsOn(reobfJar)
+}
+
+runServer {
+    downloadPlugins {
+        github('EssentialsX', 'Essentials', '2.20.1', 'EssentialsX-2.20.1.jar')
+        github('dmulloy2', 'ProtocolLib', '5.1.0', 'ProtocolLib.jar')
+    }
+    minecraftVersion("1.18.2")
+    jvmArgs("-Xmx1G")
+    System.out.println("Running server on java version " + System.getProperty("java.version"))
 }
