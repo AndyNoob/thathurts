@@ -2,7 +2,6 @@ package me.comfortable_andy.thathurts;
 
 import co.aikar.commands.BukkitCommandManager;
 import me.comfortable_andy.thathurts.commands.BoundingBoxTestCommand;
-import me.comfortable_andy.thathurts.commands.SetColorCommand;
 import me.comfortable_andy.thathurts.listeners.DamageListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,7 +18,6 @@ public final class ThatHurtsMain extends JavaPlugin {
 
         final BukkitCommandManager manager = new BukkitCommandManager(this);
         manager.registerCommand(new BoundingBoxTestCommand(manager));
-        manager.registerCommand(new SetColorCommand());
 
     }
 
