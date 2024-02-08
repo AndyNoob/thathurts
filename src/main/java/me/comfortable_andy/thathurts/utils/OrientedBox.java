@@ -34,7 +34,7 @@ public class OrientedBox extends OrientedCollider {
     }
 
     public OrientedBox(BoundingBox box) {
-        this(box.getCenter(), box.getMin().subtract(box.getCenter()).multiply(2), box.getMax().subtract(box.getCenter()).multiply(2));
+        this(box.getCenter(), box.getMin().subtract(box.getCenter()), box.getMax().subtract(box.getCenter()));
     }
 
     @Override
