@@ -122,14 +122,15 @@ public class BoundingBoxTestCommand extends BaseCommand {
             sender.sendMessage(ChatColor.RED + "No testing box with that name.");
             return;
         }
-        final Vector vector = this.testingBox.get(name).trace(player.getEyeLocation().toVector(), player.getEyeLocation().getDirection());
+        final Vector3f vector = (this.testingBox.get(name).trace(player.getEyeLocation().toVector(), player.getEyeLocation().getDirection()));
+
         if (vector == null) {
             sender.sendMessage(ChatColor.RED + "Didn't hit.");
             return;
         }
 
-        this.world.spawnParticle(Particle.END_ROD, bukkitLoc(vector, this.world), 1, 0, 0, 0, 0, null, true);
-        final ArmorStand stand = this.world.spawn(bukkitLoc(vector, this.world), ArmorStand.class);
+        this.world.spawnParticle(Particle.END_ROD, bukkitLoc(convertBukkit(vector), this.world), 1, 0, 0, 0, 0, null, true);
+        final ArmorStand stand = this.world.spawn(bukkitLoc(convertBukkit(vector), this.world), ArmorStand.class);
         stand.setGlowing(true);
         stand.setGravity(false);
 

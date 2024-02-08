@@ -34,17 +34,19 @@ public abstract class OrientedCollider {
         return sides;
     }
 
-    public void rotateBy(float xDeg, float yDeg, float zDeg) {
-        this.rotateBy(new Quaternionf().rotationXYZ((float) Math.toRadians(xDeg), (float) Math.toRadians(yDeg), (float) Math.toRadians(zDeg)).invert());
+    public <C extends OrientedCollider> C rotateBy(float xDeg, float yDeg, float zDeg) {
+        return this.rotateBy(new Quaternionf().rotationXYZ((float) Math.toRadians(xDeg), (float) Math.toRadians(yDeg), (float) Math.toRadians(zDeg)).invert());
     }
 
-    public void rotateBy(@NotNull Quaternionf rotation) {
+    @SuppressWarnings("unchecked")
+    public <C extends OrientedCollider> C rotateBy(@NotNull Quaternionf rotation) {
         this.axes.rotated(rotation);
         this.relativeVertices.replaceAll(vertex -> vertex.rotated(rotation));
+        return (C) this;
     }
 
     @Nullable
-    public Vector trace(@NotNull Vector ori, @NotNull Vector dir) {
+    public Vector3f trace(@NotNull Vector ori, @NotNull Vector dir) {
         if (!dir.isNormalized()) dir = dir.normalize();
 
         Vector3f rayOrigin = convertJoml(ori);
@@ -134,7 +136,8 @@ public abstract class OrientedCollider {
             }
         }
 
-        return convertBukkit(rayOrigin.add(normalizedDir.mul(greatestCloseHit, new Vector3f()), new Vector3f()));
+        return rayOrigin
+                .add(normalizedDir.mul(greatestCloseHit, new Vector3f()), new Vector3f());
     }
 
     private float[/* 2 */] projectMinMax(Vector3f axis) {
