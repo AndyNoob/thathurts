@@ -2,7 +2,6 @@ package me.comfortable_andy.thathurts.utils;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.math.FloatRange;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -16,7 +15,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import static me.comfortable_andy.thathurts.utils.PositionUtil.*;
-import static me.comfortable_andy.thathurts.utils.PositionUtil.convertJoml;
 
 @Getter
 @RequiredArgsConstructor
@@ -158,6 +156,8 @@ public abstract class OrientedCollider {
     }
 
     public @Nullable Vector3f getMinimumTranslate(@NotNull OrientedCollider other) {
+        // source: https://dyn4j.org/2010/01/sat/#sat-contain
+
         float smallestOverlap = Float.POSITIVE_INFINITY;
         Vector3f smallestAxis = null;
 
@@ -196,11 +196,42 @@ public abstract class OrientedCollider {
                     thisProjectionMinMax[1], otherProjectionMinMax[1]
             );
 
-            final float overlap = maxPlane - minPlane;
+            float overlap = maxPlane - minPlane;
+
+            final float minPlaneDepth = Math.abs(thisProjectionMinMax[0] - otherProjectionMinMax[0]);
+            final float maxPlaneDepth = Math.abs(thisProjectionMinMax[1] - otherProjectionMinMax[1]);
+
+            /*
+                -                                     + (dir of axis)
+                              {overlap}
+                <----------|--[-------]-------|------->
+                             ^
+                             |
+                      smaller depth
+                there's two wrong things here:
+                1. the overlap movement direction is completely wrong
+                2. on top of that the depth is sending it the other way even more
+
+                the first issue situation is also a problem here
+                where containment isn't an issue
+                -                                     + (dir of axis)
+                            { overlap }
+                <-------[---|---------]-------|------->
+                          ^                ^
+                          |                |
+                     min depth             |
+                                       max depth
+             */
+            if (thisRange.containsRange(otherRange) || otherRange.containsRange(thisRange))
+                overlap += Math.min(minPlaneDepth, maxPlaneDepth);
 
             if (overlap < smallestOverlap) {
                 smallestOverlap = overlap;
                 smallestAxis = axis;
+                if (minPlaneDepth < maxPlaneDepth) {
+                    System.out.println("negated");
+                    smallestAxis.negate();
+                }
             }
         }
 
