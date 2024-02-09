@@ -17,6 +17,12 @@ public class DamageListener implements Listener {
 
         event.getEntity().sendMessage("Damaged part: " + part);
         event.getDamager().sendMessage("Damaged part: " + part);
+        event.getDamager().sendMessage("Original: " + event.getDamage());
+
+        if (part != null) {
+            event.setDamage(event.getDamage() * part.getMultiplier());
+            event.getDamager().sendMessage("New: " + event.getDamage());
+        }
     }
 
 }

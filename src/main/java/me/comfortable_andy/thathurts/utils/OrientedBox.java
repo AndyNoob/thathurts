@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.joml.Vector3f;
@@ -63,4 +65,14 @@ public class OrientedBox extends OrientedCollider {
         return new ArrayList<>(Arrays.asList(vert));
     }
 
+    public void display(World world, Particle particle) {
+        for (Vertex vertex : getRelativeVertices()) {
+            int extra = 0;
+            world.spawnParticle(particle, bukkitLoc(convertBukkit(vertex.pos()).add(convertBukkit(getCenter())), world), 1, 0, 0, 0, extra);
+        }
+        for (Side side : computeSides()) {
+            side.display(world, particle);
+        }
+        getAxes().display(world, getCenter());
+    }
 }

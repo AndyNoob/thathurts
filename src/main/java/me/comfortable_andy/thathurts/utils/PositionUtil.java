@@ -9,8 +9,6 @@ import org.joml.Vector3f;
 @SuppressWarnings("unused")
 public class PositionUtil {
 
-
-
     public static Vector lerp(@NotNull Vector min, @NotNull Vector max, final double factor) {
         return new Vector(NumberUtil.lerp(min.getX(), max.getX(), factor), NumberUtil.lerp(min.getY(), max.getY(), factor), NumberUtil.lerp(min.getZ(), max.getZ(), factor));
     }
@@ -49,6 +47,10 @@ public class PositionUtil {
 
     public static Location bukkitLoc(Vector vector, World world) {
         return new Location(world, vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    public static boolean normalized(Vector3f v) {
+        return (v.lengthSquared() - 1) < Vector.getEpsilon();
     }
 
 }

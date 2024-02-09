@@ -1,77 +1,81 @@
 package me.comfortable_andy.thathurts.collision;
 
-import org.apache.commons.lang.math.DoubleRange;
+import lombok.Getter;
+import me.comfortable_andy.thathurts.utils.OrientedBox;
+import me.comfortable_andy.thathurts.utils.OrientedCollider;
+import org.apache.commons.lang.math.FloatRange;
+import org.bukkit.Particle;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
+import static me.comfortable_andy.thathurts.utils.PositionUtil.convertBukkit;
+import static me.comfortable_andy.thathurts.utils.PositionUtil.convertJoml;
+
+@Getter
 public enum BodyPart {
 
-    HEAD(EquipmentSlot.HEAD, new DoubleRange(0, 2.5), new DoubleRange(1.5, 2.5)),
-    ARMS(EquipmentSlot.CHEST, new DoubleRange(0.16, 2.5), new DoubleRange(0.75, 1.5)),
-    BODY(EquipmentSlot.CHEST, new DoubleRange(0, 0.16), new DoubleRange(0.75, 1.5)),
-    LEGS(EquipmentSlot.LEGS, new DoubleRange(0, 2.5), new DoubleRange(0.3, 0.75)),
-    FEET(EquipmentSlot.FEET, new DoubleRange(0, 2.5), new DoubleRange(0, 0.3));
+    HEAD(EquipmentSlot.HEAD, new FloatRange(0, 1), new FloatRange(0.8, 1), 1.5),
+    ARMS(EquipmentSlot.CHEST, new FloatRange(0.75, 1), new FloatRange(0.5, 0.8), 0.75),
+    BODY(EquipmentSlot.CHEST, new FloatRange(0, 0.75), new FloatRange(0.5, 0.8), 1.0),
+    LEGS(EquipmentSlot.LEGS, new FloatRange(0, 1), new FloatRange(0.25, 0.5), 0.8),
+    FEET(EquipmentSlot.FEET, new FloatRange(0, 1), new FloatRange(0, 0.25), 0.65);
 
     private final EquipmentSlot slot;
-    private final DoubleRange xRange;
-    private final DoubleRange yRange;
+    private final FloatRange xRange;
+    private final FloatRange yRange;
+    private final double multiplier;
 
     /**
      * This class represents the player's body dissected in a 2d plane with the player's front facing towards the viewer, where the bottom center of the player is at the origin.
      *
-     * @param slot   the equipment slot that covers this body part
-     * @param xRange positive and originates at 0, distance from the y-axis, covers both the positive and negative spectrum
-     * @param yRange positive and originates at 0, distance from the x-axis
+     * @param slot       the equipment slot that covers this body part
+     * @param xRange     positive and originates at 0, distance from the y-axis, covers both the positive and negative spectrum
+     * @param yRange     positive and originates at 0, distance from the x-axis
+     * @param multiplier damage multiplier
      */
-    BodyPart(EquipmentSlot slot, DoubleRange xRange, DoubleRange yRange) {
+    BodyPart(EquipmentSlot slot, FloatRange xRange, FloatRange yRange, double multiplier) {
         this.slot = slot;
         this.yRange = yRange;
         this.xRange = xRange;
+        this.multiplier = multiplier;
     }
 
     @Nullable
     public static BodyPart findPart(LivingEntity damaged, LivingEntity damager) {
-        final Vector damagedPosition = damaged.getLocation().toVector();
-        final Vector damagerPosition = damager.getLocation().toVector();
+        final OrientedBox damagedBox = new OrientedBox(damaged.getBoundingBox().expand(0.1)).rotateBy(0, damaged.getLocation().getYaw(), 0);
 
-        final Vector damagedDirection = damaged.getLocation().getDirection();
-        final Vector damagerDirection = damager.getLocation().getDirection();
+        final Vector3f hit = damagedBox.trace(
+                convertJoml(damager.getEyeLocation().toVector()),
+                convertJoml(damager.getLocation().getDirection())
+        );
+        if (hit == null)
+            return null;
 
-        final double radians = Math.toRadians(90);
-        final Vector damagedRightDirection = damagedDirection.clone().rotateAroundY(radians);
-        final Vector upDirection = new Vector(0, 1, 0);
+        damagedBox.display(damaged.getWorld(), Particle.VILLAGER_HAPPY);
+        damaged.getWorld().spawnParticle(Particle.FLAME, convertBukkit(hit).toLocation(damaged.getWorld()), 1, 0, 0, 0, 0);
 
-        final BoundingBox box = damaged.getBoundingBox();
-        final Vector boxCenter = box.getCenter();
+        hit.sub(convertJoml(damaged.getLocation().toVector()));
 
+        final Vector3f leftwards = convertJoml(BlockFace.EAST.getDirection())
+                .rotateY((float) Math.toRadians(-damaged.getLocation().getYaw()));
 
-        // now check intersection
+        new OrientedCollider.Side(convertJoml(damaged.getEyeLocation().toVector()), convertJoml(damaged.getEyeLocation().toVector()).add(leftwards)).display(damaged.getWorld(), Particle.END_ROD);
 
-        /*final double deltaX = ;
-        final double deltaY = ;
+        final double halfWidth = damaged.getWidth() / 2;
+        final double height = damaged.getHeight();
+        final double yLevel = Math.min(1, hit.y / height);
+        final double xLevel = Math.max(-1, Math.min(1, leftwards.dot(hit) / halfWidth));
 
-        for (BodyPart part : values()) {
-            if (part.yRange.containsDouble(deltaY) && part.xRange.containsDouble(deltaX)) return part;
-        }*/
+        for (BodyPart part : BodyPart.values()) {
+            if (!part.xRange.containsDouble(Math.abs(xLevel))) continue;
+            if (!part.yRange.containsDouble(yLevel)) continue;
+            return part;
+        }
 
         return null;
     }
 
 }
-
-/*
-
-        damaged.sendMessage("Target: " + damagerTargetPoint);
-        damaged.sendMessage("Damager Dir: " + damagerDirection);
-        damaged.sendMessage("Delta X: " + deltaX + ", Delta Y: " + deltaY);
-
-        damager.sendMessage("Target: " + damagerTargetPoint);
-        damager.sendMessage("Damager Dir: " + damagerDirection);
-        damager.sendMessage("Delta X: " + deltaX + ", Delta Y: " + deltaY);
-
-        damaged.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, damagerTargetPoint.toLocation(damager.getWorld()), 1, 0, 0, 0);
-
- */

@@ -9,7 +9,6 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Subcommand;
 import me.comfortable_andy.thathurts.ThatHurtsMain;
 import me.comfortable_andy.thathurts.utils.OrientedBox;
-import me.comfortable_andy.thathurts.utils.OrientedCollider;
 import org.bukkit.*;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -18,7 +17,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
-import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -26,8 +24,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static me.comfortable_andy.thathurts.utils.PositionUtil.bukkitLoc;
-import static me.comfortable_andy.thathurts.utils.PositionUtil.convertBukkit;
+import static me.comfortable_andy.thathurts.utils.PositionUtil.*;
 
 @CommandPermission("thathurts.commands.boundingboxtest")
 @CommandAlias("bounding|bb|boundingbox|btest|bbtest|bbt")
@@ -43,7 +40,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
         if (this.testingBox.isEmpty()) return;
 
         for (OrientedBox box : this.testingBox.values()) {
-            render(box);
+            box.display(this.world, this.particle);
 
             for (Player player : Bukkit.getOnlinePlayers()) {
                 final OrientedBox playerBox = new OrientedBox(player.getBoundingBox());
@@ -51,24 +48,13 @@ public class BoundingBoxTestCommand extends BaseCommand {
                 playerBox.rotateBy(
                         new Quaternionf().rotationY((float) Math.toRadians(-location.getYaw()))
                 );
-                render(playerBox);
+                playerBox.display(this.world, this.particle);
                 final Vector3f translate = box.getMinimumTranslate(playerBox);
                 if (translate == null) continue;
                 player.setVelocity(convertBukkit(translate).normalize());
             }
         }
     };
-
-    private void render(OrientedBox box) {
-        for (OrientedCollider.Vertex vertex : box.getRelativeVertices()) {
-            int extra = 0;
-            this.world.spawnParticle(this.particle, bukkitLoc(convertBukkit(vertex.pos()).add(convertBukkit(box.getCenter())), this.world), 1, 0, 0, 0, extra);
-        }
-        for (OrientedCollider.Side side : box.computeSides()) {
-            side.display(this.world, this.particle);
-        }
-        box.getAxes().display(world, Particle.FLAME, box.getCenter());
-    }
 
     public BoundingBoxTestCommand(BukkitCommandManager manager) {
         manager.getCommandCompletions().registerCompletion("box", context -> {
@@ -122,7 +108,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
             sender.sendMessage(ChatColor.RED + "No testing box with that name.");
             return;
         }
-        final Vector3f vector = (this.testingBox.get(name).trace(player.getEyeLocation().toVector(), player.getEyeLocation().getDirection()));
+        final Vector3f vector = (this.testingBox.get(name).trace(convertJoml(player.getEyeLocation().toVector()), convertJoml(player.getEyeLocation().getDirection())));
 
         if (vector == null) {
             sender.sendMessage(ChatColor.RED + "Didn't hit.");

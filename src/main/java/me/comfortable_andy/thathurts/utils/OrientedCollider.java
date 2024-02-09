@@ -3,6 +3,8 @@ package me.comfortable_andy.thathurts.utils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.math.FloatRange;
+import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -13,8 +15,10 @@ import org.joml.Vector3f;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Consumer;
 
-import static me.comfortable_andy.thathurts.utils.PositionUtil.*;
+import static me.comfortable_andy.thathurts.utils.PositionUtil.bukkitLoc;
+import static me.comfortable_andy.thathurts.utils.PositionUtil.convertBukkit;
 
 @Getter
 @RequiredArgsConstructor
@@ -35,7 +39,13 @@ public abstract class OrientedCollider {
     }
 
     public <C extends OrientedCollider> C rotateBy(float xDeg, float yDeg, float zDeg) {
-        return this.rotateBy(new Quaternionf().rotationXYZ((float) Math.toRadians(xDeg), (float) Math.toRadians(yDeg), (float) Math.toRadians(zDeg)).invert());
+        return this.rotateBy(new Quaternionf()
+                .rotationXYZ(
+                        (float) Math.toRadians(xDeg),
+                        (float) Math.toRadians(yDeg),
+                        (float) Math.toRadians(zDeg))
+                .invert()
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -46,11 +56,11 @@ public abstract class OrientedCollider {
     }
 
     @Nullable
-    public Vector3f trace(@NotNull Vector ori, @NotNull Vector dir) {
-        if (!dir.isNormalized()) dir = dir.normalize();
+    public Vector3f trace(@NotNull Vector3f ori, @NotNull Vector3f dir) {
+        if (!PositionUtil.normalized(dir)) dir = dir.normalize();
 
-        Vector3f rayOrigin = convertJoml(ori);
-        Vector3f normalizedDir = convertJoml(dir);
+        final Vector3f rayOrigin = new Vector3f(ori);
+        final Vector3f normalizedDir = new Vector3f(dir);
 
         // source: https://github.com/opengl-tutorials/ogl/blob/316cccc5f76f47f09c16089d98be284b689e057d/misc05_picking/misc05_picking_custom.cpp#L83C13-L83C13
 
@@ -125,12 +135,6 @@ public abstract class OrientedCollider {
 
                 smallestFarHit = Math.min(biggerPlane, smallestFarHit);
                 greatestCloseHit = Math.max(smallerPlane, greatestCloseHit);
-
-                System.out.println();
-                System.out.println("smallerPlane = " + smallerPlane);
-                System.out.println("biggerPlane = " + biggerPlane);
-                System.out.println("greatestCloseHit = " + greatestCloseHit);
-                System.out.println("smallestFarHit = " + smallestFarHit);
 
                 if (greatestCloseHit > smallestFarHit) return null;
             }
@@ -274,9 +278,17 @@ public abstract class OrientedCollider {
             return new Vector3f(this.z);
         }
 
-        public void display(World world, Particle particle, Vector3f center) {
+        public void display(World world, Vector3f center) {
+            final Iterator<Color> colors = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE).iterator();
             for (Vector3f vector3f : this.makeArr()) {
-                new Side(new Vertex(new Vector3f(center)), new Vertex(new Vector3f(center).add(vector3f))).display(world, particle);
+                final Color col = colors.next();
+                new Side(
+                        new Vertex(new Vector3f(center)),
+                        new Vertex(new Vector3f(center).add(vector3f))
+                ).display(world, loc -> loc.getWorld()
+                        .spawnParticle(Particle.REDSTONE, loc, 1, 0, 0, 0, 0,
+                                new Particle.DustOptions(col, 1))
+                );
             }
         }
 
@@ -314,12 +326,20 @@ public abstract class OrientedCollider {
 
     public record Side(Vertex a, Vertex b) {
 
+        public Side(Vector3f a, Vector3f b) {
+            this(new Vertex(a), new Vertex(b));
+        }
+
         public void display(World world, Particle particle) {
+            display(world, loc -> world.spawnParticle(particle, loc, 1, 0, 0, 0, 0));
+        }
+
+        public void display(World world, Consumer<Location> spawnParticle) {
             final Vector3f current = new Vector3f(this.a.pos);
             final Vector3f next = new Vector3f(this.b.pos);
             for (int j = 0; j < 10; j++) {
                 final float progress = ((float) j) / 10;
-                world.spawnParticle(particle, bukkitLoc(convertBukkit(current.lerp(next, progress, new Vector3f())), world), 1, 0, 0, 0, 0);
+                spawnParticle.accept(bukkitLoc(convertBukkit(current.lerp(next, progress, new Vector3f())), world));
             }
         }
 
