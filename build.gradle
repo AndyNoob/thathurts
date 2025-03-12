@@ -1,8 +1,8 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'io.papermc.paperweight.userdev' version '1.5.9'
-    id 'xyz.jpenilla.run-paper' version '2.2.2'
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.14'
+    id 'xyz.jpenilla.run-paper' version '2.3.1'
 }
 
 group = 'me.comfortable_andy'
@@ -29,22 +29,23 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    def lombok = 'org.projectlombok:lombok:1.18.30'
+    compileOnly lombok
+    annotationProcessor lombok
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.28'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+    testCompileOnly lombok
+    testAnnotationProcessor lombok
 
     compileOnly 'org.jetbrains:annotations:24.0.0'
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
     implementation 'co.aikar:acf-bukkit:0.5.1-SNAPSHOT'
     implementation 'org.joml:joml:1.10.5'
 
-    paperweight.paperDevBundle '1.19.2-R0.1-SNAPSHOT'
+    paperweight.paperDevBundle '1.20.1-R0.1-SNAPSHOT'
 
     testImplementation 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.12.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.12.0'
 
     test.useJUnitPlatform()
 }
@@ -87,10 +88,6 @@ shadowJar {
 
 tasks.build {
     dependsOn(shadowJar)
-}
-
-tasks.assemble {
-    dependsOn(reobfJar)
 }
 
 runServer {
