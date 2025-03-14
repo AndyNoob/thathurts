@@ -97,7 +97,6 @@ public abstract class OrientedCollider {
                                /              <----+(ray is outside & pointing in)
                               /
                              +
-
                  */
                 if (!isOriginBetween) return null;
             } else {
@@ -126,6 +125,14 @@ public abstract class OrientedCollider {
                        to the side, the dirOrientation grows smaller towards zero. by
                        dividing, a ray pointing away will also "move", or enlarge the plane
                        values in respect to the ray orientation.
+
+                    derived from intersecting ray and plane:
+                        0         = n•(p - p_0)
+                        p(t)      = r_0 + (t*dir)
+                        0         = n•(r_0 + t*dir - p_0)
+                        0         = n•r_0 + n•(t*dir) - n•p_0
+                        n•(t*dir) = n•p_0 - n•r_0
+                        t         = (n•r_0 - n•p_0) / n•dir
                  */
                 final float alignedMinPlane = relMinPlane / dirOrientation;
                 final float alignedMaxPlane = relMaxPlane / dirOrientation;
