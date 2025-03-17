@@ -17,6 +17,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static me.comfortable_andy.thathurts.utils.NumberUtil.clamp;
 import static me.comfortable_andy.thathurts.utils.PositionUtil.bukkitLoc;
 import static me.comfortable_andy.thathurts.utils.PositionUtil.convertBukkit;
 
@@ -43,7 +44,8 @@ public abstract class OrientedCollider {
                 .rotationXYZ(
                         (float) Math.toRadians(xDeg),
                         (float) Math.toRadians(yDeg),
-                        (float) Math.toRadians(zDeg))
+                        (float) Math.toRadians(zDeg)
+                )
                 .invert()
         );
     }
@@ -294,7 +296,8 @@ public abstract class OrientedCollider {
                         new Vertex(new Vector3f(center).add(vector3f))
                 ).display(world, loc -> loc.getWorld()
                         .spawnParticle(Particle.REDSTONE, loc, 1, 0, 0, 0, 0,
-                                new Particle.DustOptions(col, 1))
+                                new Particle.DustOptions(col, 1)
+                        )
                 );
             }
         }
@@ -351,8 +354,45 @@ public abstract class OrientedCollider {
         }
 
         public Side offset(Vector3f offset) {
-            return new Side(new Vertex(new Vector3f(this.a.pos).add(offset)),
-                    new Vertex(new Vector3f(this.b.pos).add(offset)));
+            return new Side(
+                    new Vertex(new Vector3f(this.a.pos).add(offset)),
+                    new Vertex(new Vector3f(this.b.pos).add(offset))
+            );
+        }
+
+        public Vector3f direction(boolean normalize) {
+            Vector3f dir = b.pos.sub(a.pos, new Vector3f());
+            return normalize ? dir.normalize() : dir;
+        }
+
+        public float length() {
+            return a.pos.distance(b.pos);
+        }
+
+        public Vector3f[] closestPointTo(Side other, boolean clampThis, boolean clampOther) {
+            float len = length();
+            Vector3f dir = direction(false).div(len);
+            float lenOther = other.length();
+            Vector3f dirOther = other.direction(false).div(lenOther);
+            Vector3f dirShortest = dir.cross(dirOther, new Vector3f());
+            Vector3f planeA = dir.cross(dirShortest, new Vector3f()).normalize();
+            Vector3f planeB = dirOther.cross(dirShortest, new Vector3f()).normalize();
+            /*
+            n • (p - p0) = 0
+            p(t) = d * t + d0
+
+            n • (d * t + d0 - p0) = 0
+            n • d * t + n • (d0 - p0) = 0
+            n • d * t = -n • (d0 - p0)
+            t = (-n • (d0 - p0)) / (n • d)
+            t = (p0 • n - d0 • n) / (n • d)
+             */
+            float tA = (other.a.pos.dot(planeB) - a.pos.dot(planeB)) / (planeB.dot(dir));
+            float tB = (a.pos.dot(planeA) - other.a.pos.dot(planeA)) / (planeA.dot(dirOther));
+            return new Vector3f[]{
+                    a.pos.add(dir.mul(clampThis ? (clamp(0, tA, len)) : tA), new Vector3f()),
+                    other.a.pos.add(dirOther.mul(clampOther ? (clamp(0, tB, lenOther)) : tB), new Vector3f())
+            };
         }
 
         @Override

@@ -26,12 +26,12 @@ public class CollisionDebugMapRenderer extends MapRenderer {
         }
         // draw polygon
         for (Vector2f[] segment : data.polygon().makeSegments()) {
-            Vector2f a = segment[0].mul(5, new Vector2f()).add(64, 64, new Vector2f());
-            Vector2f b = segment[1].mul(5, new Vector2f()).add(64, 64, new Vector2f());
+            Vector2f a = segment[0].mul(15, new Vector2f()).add(64, 64, new Vector2f());
+            Vector2f b = segment[1].mul(15, new Vector2f()).add(64, 64, new Vector2f());
             drawLine(mapCanvas, a, b);
         }
         // draw point
-        Vector2f pt = data.closest().mul(5, new Vector2f()).add(64, 64, new Vector2f());
+        Vector2f pt = data.closest().mul(15, new Vector2f()).add(64, 64, new Vector2f());
         mapCanvas.setPixelColor((int) pt.x, (int) pt.y, Color.RED);
         mapCanvas.setPixelColor((int) pt.x + 1, (int) pt.y, Color.RED);
         mapCanvas.setPixelColor((int) pt.x - 1, (int) pt.y, Color.RED);

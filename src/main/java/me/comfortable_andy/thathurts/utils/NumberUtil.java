@@ -11,6 +11,10 @@ public class NumberUtil {
         return Math.min(max, Math.max(min, value));
     }
 
+    public static float clamp(float min, float value, float max) {
+        return Math.min(max, Math.max(min, value));
+    }
+
     public static double greaterThanZero(double value) {
         return Math.max(0, value);
     }

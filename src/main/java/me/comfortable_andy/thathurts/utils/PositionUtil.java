@@ -41,6 +41,10 @@ public class PositionUtil {
         return new Vector3f((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
     }
 
+    public static Vector3f convertJoml(Location location) {
+        return convertJoml(location.toVector());
+    }
+
     public static Vector convertBukkit(Vector3f vector) {
         return new Vector(vector.x(), vector.y(), vector.z());
     }

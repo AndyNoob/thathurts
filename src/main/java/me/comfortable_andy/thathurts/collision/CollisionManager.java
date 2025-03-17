@@ -58,39 +58,23 @@ public class CollisionManager {
                 Location camera = player.getEyeLocation();
 
                 List<Vector2f> list = damagedBox.getRelativeVertices().stream()
-                        .map(v -> new Vector3f().set(v.pos())
-                                .add(damagedBox.getCenter()).sub(camera.toVector().toVector3f())
-                        )
-                        .map(v3 -> {
-                            Vector2f f = new Vector2f(
-                                    -axes.x().dot(v3),
-                                    axes.y().dot(v3)
-                            );
-                            return f.mul(10);
-                        })
+                        .map(v -> new Vector3f().set(v.pos()).add(damagedBox.getCenter()).sub(camera.toVector().toVector3f()))
+                        .map(v3 -> new Vector2f(-axes.x().dot(v3), axes.y().dot(v3)))
                         .toList();
 
                 ConvexPolygon polygon = new ConvexPolygon(list);
                 Vector2f origin = new Vector2f();
-                Vector2f closest = polygon.isPointIn(origin) ? origin : polygon.findClosestPoint(origin).div(10);
-
-                Location newOrigin = camera
-                        .add(convertBukkit(axes.x().mul(-closest.x, new Vector3f())))
-                        .add(convertBukkit(axes.y().mul(closest.y, new Vector3f())));
+                Vector2f shift = polygon.isPointIn(origin) ? origin : polygon.findClosestPoint(origin);
 
                 if (debugModeOn) {
-                    axes.display(world, camera.toVector().toVector3f());
-                    world.spawnParticle(Particle.FLAME, newOrigin, 1, 0, 0, 0, 0);
-                    DEBUG_DATA = new CollisionDebugData(polygon, closest);
+                    DEBUG_DATA = new CollisionDebugData(polygon, shift);
                 }
                 if (hit == null) {
-                    if (debugModeOn)
-                        damager.sendMessage("Attempt adjustment " + closest
-                                .mul(-1, 1, new Vector2f()));
-                    hit = damagedBox.trace(
-                            convertJoml(newOrigin.toVector()),
-                            convertJoml(traceDir)
+                    OrientedCollider.Side ray = new OrientedCollider.Side(
+                            convertJoml(camera),
+                            convertJoml(camera.clone().add(traceDir))
                     );
+                    hit = findClosest(damagedBox, ray);
                     adjusted = true;
                 }
             }
@@ -131,6 +115,20 @@ public class CollisionManager {
         }
 
         return null;
+    }
+
+    private static Vector3f findClosest(OrientedBox damagedBox, OrientedCollider.Side ray) {
+        Vector3f[] closest = null;
+        float closeDist = 0;
+        for (OrientedCollider.Side side : damagedBox.computeSides()) {
+            Vector3f[] pts = side.closestPointTo(ray, true, false);
+            float curDist = pts[0].distanceSquared(pts[1]);
+            if (closest == null || curDist < closeDist) {
+                closest = pts;
+                closeDist = curDist;
+            }
+        }
+        return closest == null ? null : closest[0];
     }
 
     record CollisionDebugData(ConvexPolygon polygon, Vector2f closest) {
