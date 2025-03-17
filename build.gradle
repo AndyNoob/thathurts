@@ -36,10 +36,9 @@ dependencies {
     testCompileOnly lombok
     testAnnotationProcessor lombok
 
-    compileOnly 'org.jetbrains:annotations:24.0.0'
-    compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
-    implementation 'co.aikar:acf-bukkit:0.5.1-SNAPSHOT'
-    implementation 'org.joml:joml:1.10.5'
+    implementation('co.aikar:acf-bukkit:0.5.1-SNAPSHOT') {
+        exclude(group: "org.bukkit")
+    }
 
     paperweight.paperDevBundle '1.20.1-R0.1-SNAPSHOT'
 
@@ -91,11 +90,10 @@ tasks.build {
 }
 
 runServer {
-    downloadPlugins {
+    /*downloadPlugins {
         github('EssentialsX', 'Essentials', '2.20.1', 'EssentialsX-2.20.1.jar')
         github('dmulloy2', 'ProtocolLib', '5.1.0', 'ProtocolLib.jar')
-    }
-    minecraftVersion("1.18.2")
-    jvmArgs("-Xmx1G")
+    }*/
+    jvmArgs("-Xms1G", "-Xmx1G", "-Djoml.format='false'")
     System.out.println("Running server on java version " + System.getProperty("java.version"))
 }

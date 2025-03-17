@@ -9,7 +9,11 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Subcommand;
 import me.comfortable_andy.thathurts.ThatHurtsMain;
 import me.comfortable_andy.thathurts.utils.OrientedBox;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
@@ -25,7 +29,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static me.comfortable_andy.thathurts.utils.PositionUtil.*;
+import static org.bukkit.ChatColor.BOLD;
+import static org.bukkit.ChatColor.RESET;
 
+@SuppressWarnings("deprecation")
 @CommandPermission("thathurts.commands.boundingboxtest")
 @CommandAlias("bounding|bb|boundingbox|btest|bbtest|bbt")
 public class BoundingBoxTestCommand extends BaseCommand {
@@ -40,7 +47,8 @@ public class BoundingBoxTestCommand extends BaseCommand {
         if (this.testingBox.isEmpty()) return;
 
         for (OrientedBox box : this.testingBox.values()) {
-            box.display(this.world, this.particle);
+            if (this.world.getFullTime() % 20 == 0)
+                box.display(this.world, this.particle);
 
             for (Player player : Bukkit.getOnlinePlayers()) {
                 final OrientedBox playerBox = new OrientedBox(player.getBoundingBox());
@@ -61,7 +69,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
             if (this.testingBox.isEmpty()) return Collections.emptyList();
             return this.testingBox.keySet();
         });
-        Bukkit.getScheduler().runTaskTimer(manager.getPlugin(), this.renderRunnable, 0, 20);
+        Bukkit.getScheduler().runTaskTimer(manager.getPlugin(), this.renderRunnable, 0, 1);
     }
 
     @Subcommand("make")
@@ -73,7 +81,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
         }
         this.world = sender instanceof Entity entity ? entity.getWorld() : ((BlockCommandSender) sender).getBlock().getWorld();
         this.testingBox.put(name, new OrientedBox(BoundingBox.of(min, max)));
-        sender.sendMessage("\"" + ChatColor.BOLD + name + ChatColor.RESET + "\" created.");
+        sender.sendMessage("\"" + BOLD + name + RESET + "\" created.");
     }
 
     @Subcommand("destroy")
@@ -89,7 +97,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
             return;
         }
         this.testingBox.remove(name);
-        sender.sendMessage("Destroyed " + ChatColor.BOLD + name + ChatColor.RESET + ".");
+        sender.sendMessage("Destroyed " + BOLD + name + RESET + ".");
     }
 
     @Subcommand("trace")
@@ -147,7 +155,7 @@ public class BoundingBoxTestCommand extends BaseCommand {
 
         box.rotateBy(x, y, z);
 
-        sender.sendMessage("Rotated " + ChatColor.BOLD + name + ChatColor.RESET + " by " + x + ", " + y + ", " + z);
+        sender.sendMessage("Rotated " + BOLD + name + RESET + " by " + x + ", " + y + ", " + z);
         sender.sendMessage("or," + Math.toRadians(x) + ", " + Math.toRadians(y) + ", " + Math.toRadians(z));
     }
 
