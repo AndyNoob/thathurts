@@ -18,8 +18,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static me.comfortable_andy.thathurts.utils.NumberUtil.clamp;
-import static me.comfortable_andy.thathurts.utils.PositionUtil.bukkitLoc;
-import static me.comfortable_andy.thathurts.utils.PositionUtil.convertBukkit;
+import static me.comfortable_andy.thathurts.utils.PositionUtil.*;
 
 @Getter
 @RequiredArgsConstructor
@@ -245,7 +244,6 @@ public abstract class OrientedCollider {
                 smallestOverlap = overlap;
                 smallestAxis = axis;
                 if (minPlaneDepth < maxPlaneDepth) {
-                    System.out.println("negated");
                     smallestAxis.negate();
                 }
             }
@@ -341,7 +339,7 @@ public abstract class OrientedCollider {
         }
 
         public void display(World world, Particle particle) {
-            display(world, loc -> world.spawnParticle(particle, loc, 1, 0, 0, 0, 0));
+            display(world, loc -> quickParticle(particle, loc));
         }
 
         public void display(World world, Consumer<Location> spawnParticle) {

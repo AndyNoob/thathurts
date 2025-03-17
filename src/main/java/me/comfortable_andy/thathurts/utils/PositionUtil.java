@@ -1,6 +1,7 @@
 package me.comfortable_andy.thathurts.utils;
 
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +56,10 @@ public class PositionUtil {
 
     public static boolean normalized(Vector3f v) {
         return (v.lengthSquared() - 1) < Vector.getEpsilon();
+    }
+
+    public static void quickParticle(Particle particle, Location location) {
+        location.getWorld().spawnParticle(particle, location, 1, 0, 0, 0, 0);
     }
 
 }

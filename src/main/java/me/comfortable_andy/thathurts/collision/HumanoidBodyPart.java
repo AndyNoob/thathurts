@@ -33,4 +33,8 @@ public enum HumanoidBodyPart implements BodyPart {
         this.multiplier = multiplier;
     }
 
+    @Override
+    public Range<Double> getZHalfRange() {
+        return Range.between(0d, 1d);
+    }
 }
